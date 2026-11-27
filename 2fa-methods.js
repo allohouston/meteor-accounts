@@ -55,6 +55,15 @@ Accounts.validate2faChallenge = fn => registerHook(challengeHooks, fn);
 /** One mark per user and connection, so concurrent logins do not share a factor. */
 const verifiedMarkKey = (userId, connection) => `${userId}:${connection?.id ?? ''}`;
 
+/**
+ * The factor accepted for this login, before `onLogin` consumes the mark.
+ * @param {String} userId
+ * @param {Object} [connection]
+ * @returns {String|null} `otp`, `email`, or null.
+ */
+Accounts._2faAcceptedFactor = (userId, connection) =>
+  pendingVerified.get(verifiedMarkKey(userId, connection))?.method ?? null;
+
 const rememberVerified = (userId, connection, method) => {
   const now = Date.now();
   for (const [id, mark] of pendingVerified) {
